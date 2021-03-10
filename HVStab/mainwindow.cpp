@@ -213,7 +213,7 @@ void MainWindow::initPlot(QCustomPlot *plot)
 
 //    plot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom));
     // seconds of current time, we'll use it as starting point in time for data:
-    double now = QDateTime::currentDateTime().toTime_t();
+
     plot->clearGraphs();
     plot->clearItems();
     plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
@@ -252,9 +252,7 @@ void MainWindow::initPlot(QCustomPlot *plot)
 
 
     }
-    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-    dateTicker->setDateTimeFormat("HH. mm \nd. MMMM yyyy");
-    plot->xAxis->setTicker(dateTicker);
+
     // configure left axis text labels:
 //    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
 //    textTicker->addTick(10, "a bit\nlow");
@@ -264,7 +262,7 @@ void MainWindow::initPlot(QCustomPlot *plot)
     plot->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
     plot->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
     // set axis labels:
-    plot->xAxis->setLabel("Time");
+
     if(plot == ui->plotHV) plot->yAxis->setLabel("HV (V)");
     if(plot == ui->plotLP) plot->yAxis->setLabel("LP centroid possition (ch)");
     if(plot == ui->plotLPHist) plot->yAxis->setLabel("DRS Channel");
@@ -276,7 +274,17 @@ void MainWindow::initPlot(QCustomPlot *plot)
     plot->xAxis2->setTickLabels(false);
     plot->yAxis2->setTickLabels(false);
     // set axis ranges to show all data:
-    plot->xAxis->setRange(now-1800, now+100);
+
+    if(plot != ui->plotLPHist){
+        QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+        dateTicker->setDateTimeFormat("HH. mm \nd. MMMM yyyy");
+        plot->xAxis->setTicker(dateTicker);
+        double now = QDateTime::currentDateTime().toTime_t();
+        plot->xAxis->setRange(now-1800, now+100);
+        plot->xAxis->setLabel("Time");
+    }else{
+        plot->xAxis->setLabel("Integral Value");
+    }
     plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignLeft|Qt::AlignTop);
 
 //    ui->plotHV->yAxis->setRange(-1, 60);

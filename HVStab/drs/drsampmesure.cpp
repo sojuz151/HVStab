@@ -227,7 +227,7 @@ void  SingleChanellResult::setHist( QVector<double> * histValues, QVector<double
     locations->resize(count);
     histValues->resize(count);
     for(int i=0;i<count;i++){
-        (*locations)[i] = i;//(min+ (max-min)*i*1.0/count)/av;
+        (*locations)[i] = (min+ (max-min)*i*1.0/count)/av;
         (*histValues)[i]= 0;
     }
     for(int i=0;i<values.size();i++){

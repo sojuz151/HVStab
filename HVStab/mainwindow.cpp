@@ -436,10 +436,11 @@ void MainWindow::slotGraphRefresh()     // refreshing HV monitor graph
     ui->plotLP->yAxis->setRangeUpper(ui->plotLP->yAxis->range().upper*1.005);
     ui->plotLP->yAxis->setRangeLower(ui->plotLP->yAxis->range().lower*0.995);
 
-    ui->plotLPHist->yAxis->setRangeUpper(100);
-    ui->plotLPHist->yAxis->setRangeLower(0);
-    ui->plotLPHist->xAxis->setRangeUpper(21);
-    ui->plotLPHist->xAxis->setRangeLower(0);
+    ui->plotLPHist->yAxis->setRangeUpper(ui->plotLPHist->yAxis->range().upper*1.005);
+    ui->plotLPHist->yAxis->setRangeLower(ui->plotLPHist->yAxis->range().lower*0.995);
+
+    ui->plotLPHist->xAxis->setRangeUpper(ui->plotLPHist->xAxis->range().upper*1.005);
+    ui->plotLPHist->xAxis->setRangeLower(ui->plotLPHist->xAxis->range().lower*0.995);
 
     ui->plotHV->replot();
     ui->plotLP->replot();

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<Save Time="Fri Feb 26 13:34:44 2021" />
+<Crate Name="iseg-iCS2-5230315" IP="10.13.4.212" ControlerType="CC24" CrateStatusON="true" CrateHV_StatusON="false">
+	<Module Name="EDS F1 30p" SlotNumber="1" StatusON="false" NofChannels="16">
+		<Channel ChannelNumber="0" Name="C1F" Type="PMT" InitV="888.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00030" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-73954.12" />
+		<Channel ChannelNumber="1" Name="C1B" Type="" InitV="843.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-55233.85" />
+		<Channel ChannelNumber="2" Name="C2F" Type="" InitV="853.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-91453.47" />
+		<Channel ChannelNumber="3" Name="C2B" Type="" InitV="870.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-80542.87" />
+		<Channel ChannelNumber="4" Name="C3F" Type="" InitV="900.00" InitI="0.00030" UnitI="A" LimitV="910.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-45908.13" />
+		<Channel ChannelNumber="5" Name="C3B" Type="" InitV="825.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-40097.99" />
+		<Channel ChannelNumber="6" Name="C4F" Type="" InitV="785.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-35301.10" />
+		<Channel ChannelNumber="7" Name="C4B" Type="" InitV="830.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-52020.95" />
+		<Channel ChannelNumber="8" Name="C5F" Type="" InitV="868.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-76921.60" />
+		<Channel ChannelNumber="9" Name="C5B" Type="" InitV="878.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-69898.54" />
+		<Channel ChannelNumber="10" Name="C6F" Type="" InitV="845.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-67151.64" />
+		<Channel ChannelNumber="11" Name="C6B" Type="" InitV="870.00" InitI="0.00030" UnitI="A" LimitV="900.00" LimitI="0.00000" StatusON="false" InitLP="0.00" CurrV="0.00" CurrLP="-53256.36" />
+	</Module>
+</Crate>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Crate  Name="iseg1" IP="10.13.4.212" ControlerType="CC24" CrateStatusON="FALSE" CrateHV_StatusON="FALSE" >
+	<Module Name="EDS F1 30p" SlotNumber="1" StatusON="FALSE" NofChannels="16">
+		<Channel ChannelNumber="0" Name="C1F" Type="PMT"  
+                                InitV="888" InitI="0.300" UnitI="mA"
+				LimitV="900" LimitI="0.300" 
+                                StatusON="FALSE" DRSAdress="1.1">
+		</Channel> 
+                <Channel ChannelNumber="1" Name="C1B" InitV="843" InitI="0.000300" UnitI="A"  LimitV="900" StatusON="FALSE" DRSAdress="1.2"/>
+                <Channel ChannelNumber="2" Name="C2F" InitV="853" InitI="0.300" UnitI="mA" LimitV="900" StatusON="FALSE" DRSAdress="1.3" />
+                <Channel ChannelNumber="3" Name="C2B" InitV="870" InitI="300" UnitI="uA" LimitV="900" StatusON="FALSE"  DRSAdress="1.4"/>
+                <Channel ChannelNumber="4" Name="C3F" InitV="900" InitI="300" UnitI="uA" LimitV="910" StatusON="FALSE"  DRSAdress="1.5"/>
+                <Channel ChannelNumber="5" Name="C3B" InitV="825" InitI="300" UnitI="uA" LimitV="900" StatusON="FALSE"  DRSAdress="1.6"/>
+                <Channel ChannelNumber="6" Name="C4F" InitV="785" InitI="300" UnitI="uA" LimitV="900" StatusON="FALSE"  DRSAdress="1.7"/>
+                <Channel ChannelNumber="7" Name="C4B" InitV="830" InitI="300" UnitI="uA" LimitV="900" StatusON="FALSE"  DRSAdress="1.8"/>
+                <Channel ChannelNumber="8" Name="C5F" InitV="868" InitI="300" UnitI="uA" LimitV="900" StatusON="FALSE"  DRSAdress="1.9"/>
+                <Channel ChannelNumber="9" Name="C5B" InitV="878" InitI="300" UnitI="uA" LimitV="900" StatusON="FALSE"  DRSAdress="1.10"/>
+                <Channel ChannelNumber="10" Name="C6F" InitV="845" InitI="300" UnitI="uA" LimitV="900" StatusON="FALSE" DRSAdress="1.11"/>
+                <Channel ChannelNumber="11" Name="C6B" InitV="870" InitI="300" UnitI="uA" LimitV="900" StatusON="FALSE" DRSAdress="1.12"/>
+
+	</Module>
+</Crate>
+
+<DRSBox   DRSBoxNumber="1"  >
+    <Channel ChannelNumber="1" DRSSerialNumber="2854" DRSChannel="0"/>
+    <Channel ChannelNumber="2" DRSSerialNumber="2854" DRSChannel="1"/>
+    <Channel ChannelNumber="3" DRSSerialNumber="2854" DRSChannel="2"/>
+    <Channel ChannelNumber="4" DRSSerialNumber="2854" DRSChannel="3"/>
+    <Channel ChannelNumber="5" DRSSerialNumber="2853" DRSChannel="0"/>
+    <Channel ChannelNumber="6" DRSSerialNumber="2853" DRSChannel="1"/>
+    <Channel ChannelNumber="7" DRSSerialNumber="2853" DRSChannel="2"/>
+    <Channel ChannelNumber="8" DRSSerialNumber="2853" DRSChannel="3"/>
+    <Channel ChannelNumber="9" DRSSerialNumber="2852" DRSChannel="0"/>
+    <Channel ChannelNumber="10" DRSSerialNumber="2852" DRSChannel="1"/>
+    <Channel ChannelNumber="11" DRSSerialNumber="2851" DRSChannel="0"/>
+    <Channel ChannelNumber="12" DRSSerialNumber="2851" DRSChannel="1"/>
+</DRSBox>

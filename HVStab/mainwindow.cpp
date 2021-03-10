@@ -6,6 +6,7 @@
 #include "qcustomplot.h"
 
 #include <iostream>
+#include <fstream>
 
 #include <QFileDialog>
 #include <QDebug>
@@ -16,6 +17,8 @@
 #include <QByteArray>
 #include<unistd.h>
 #include <QCloseEvent>
+
+
 
 using namespace std;
 
@@ -75,10 +78,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(graphRefresh()), this, SLOT(slotGraphRefresh()));
     connect(this, SIGNAL(checkCrateHVStatus()), this, SLOT(slotCheckCrateHVStatus()));
     connect(ui->tableData, SIGNAL(cellChanged(int, int)), this, SLOT(slotNewTableValue(int, int )));
+    connect(ui->tableData_2, SIGNAL(cellChanged(int, int)), this, SLOT(slotNewTableValue(int, int )));
 
     //SpecPLot
     connect(ui->plotHV, SIGNAL(selectionChangedByUser()), this, SLOT(slotSelectionHVChanged()));
     connect(ui->plotLP, SIGNAL(selectionChangedByUser()), this, SLOT(slotSelectionLPChanged()));
+    connect(ui->plotLPHist, SIGNAL(selectionChangedByUser()), this, SLOT(slotSelectionLPHChanged()));
 
 
     QThread* HVthread = new QThread;
@@ -154,6 +159,15 @@ void MainWindow::initTableData()
     ui->tableData->setColumnWidth(5,60);
     ui->tableData->setColumnWidth(6,60);
     ui->tableData->setColumnWidth(7,60);
+
+    ui->tableData_2->setColumnWidth(0,50);
+    ui->tableData_2->setColumnWidth(1,40);
+    ui->tableData_2->setColumnWidth(2,50);
+    ui->tableData_2->setColumnHidden(3,true);
+    ui->tableData_2->setColumnHidden(4,true);
+    ui->tableData_2->setColumnHidden(5,true);
+    ui->tableData_2->setColumnHidden(6,true);
+    ui->tableData_2->setColumnHidden(7,true);
 }
 
 void MainWindow::slotNewTableValue(int row, int column)
@@ -253,6 +267,7 @@ void MainWindow::initPlot(QCustomPlot *plot)
     plot->xAxis->setLabel("Time");
     if(plot == ui->plotHV) plot->yAxis->setLabel("HV (V)");
     if(plot == ui->plotLP) plot->yAxis->setLabel("LP centroid possition (ch)");
+    if(plot == ui->plotLPHist) plot->yAxis->setLabel("DRS Channel");
     // make top and right axes visible but without ticks and labels:
     plot->xAxis2->setVisible(true);
     plot->yAxis2->setVisible(true);
@@ -279,6 +294,10 @@ void MainWindow::slotSelectionLPChanged()
     slotSelectionChanged(ui->plotLP);
 }
 
+void MainWindow::slotSelectionLPHChanged()
+{
+    slotSelectionChanged(ui->plotLPHist);
+}
 void MainWindow::slotSelectionChanged(QCustomPlot *plot)
 {
     for (int i=0; i<plot->graphCount(); ++i)
@@ -302,7 +321,8 @@ void MainWindow::fillTableData()
     deviceData_.clear();
 //    int devicetot_ = 0 ; // crate_.GetNumberofDevices();
     const int cc = 0;    // assuming a single crate system cc=0;
-    ui->tableData->setRowCount(0);  // reseting number of rows in table
+    ui->tableData->setRowCount(0);  // reseting number of rows in tables
+    ui->tableData_2->setRowCount(0);
         QVector<QString> rowData_;
         for(unsigned mm=0; mm<crate_.GetAllModules().size(); mm++)
         {
@@ -323,6 +343,7 @@ void MainWindow::fillTableData()
                 qDebug() << rowData_;
                 deviceData_.push_back(rowData_);
                 ui->tableData->insertRow(ui->tableData->rowCount());
+                ui->tableData_2->insertRow(ui->tableData_2->rowCount());
 
             }
         }
@@ -357,31 +378,47 @@ void MainWindow::slotGraphRefresh()     // refreshing HV monitor graph
 
 
     for(int gi=0; gi<deviceData_.size(); ++gi){
-    if (deviceData_.at(gi).at(2)=="1"){
-        ui->plotHV->graph(gi)->setVisible(true);
-        ui->plotLP->graph(gi)->setVisible(true);
-    }
-    if (deviceData_.at(gi).at(2)=="0"){
-        ui->plotHV->graph(gi)->setVisible(false);
-        ui->plotLP->graph(gi)->setVisible(false);
-    }
-    QString location_;
-    location_ = deviceData_.at(gi).at(0);
-    QStringList list_;
-    list_ = location_.split(".");
-    int cc = list_.at(0).toInt();  // crate number
-    int mm = list_.at(1).toInt();  // module number
-    int dd = list_.at(2).toInt();   // device number
+        if (deviceData_.at(gi).at(2)=="1"){
+            ui->plotHV->graph(gi)->setVisible(true);
+            ui->plotLP->graph(gi)->setVisible(true);
+            ui->plotLPHist->graph(gi)->setVisible(true);
+        }
+        if (deviceData_.at(gi).at(2)=="0"){
+            ui->plotHV->graph(gi)->setVisible(false);
+            ui->plotLP->graph(gi)->setVisible(false);
+            ui->plotLPHist->graph(gi)->setVisible(false);
+        }
+        QString location_;
+        location_ = deviceData_.at(gi).at(0);
+        QStringList list_;
+        list_ = location_.split(".");
+        int cc = list_.at(0).toInt();  // crate number
+        int mm = list_.at(1).toInt();  // module number
+        int dd = list_.at(2).toInt();   // device number
 
 
-    ui->plotHV->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryHVkey(),crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryHVvalue());
-// temporary line for LP
-//    ui->plotLP->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryHVkey(),crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryHVvalue());
-// final line for LP
-    ui->plotLP->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPkey(),crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPvalue());
+        ui->plotHV->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryHVkey(),crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryHVvalue());
+//        if(drsAmpMesure!=nullptr){
+//            auto index = drsAmpMesure-> indexMap.at(mm).at(dd);
+//            QVector<double> wave(1024);
+//            QVector<double> time(1024);
+//            for(int locIndex=0; locIndex<1024;locIndex++){
+//                wave[locIndex]= drsAmpMesure->wave_array[index][locIndex];
+//                time[locIndex]= drsAmpMesure->time_array[index][locIndex];
+//            }
+//            ui->plotLP->graph(gi)->setData(time,wave);
+//        }
 
-    ui->plotHV->graph(gi)->rescaleValueAxis(false,true);
-    ui->plotLP->graph(gi)->rescaleValueAxis(false,true);
+
+    //temporary for LPHisto-grams setData(double x,double y)
+        ui->plotLP->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPkey(),crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPvalue());
+//        ui->plotLPHist->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPkey(),crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPvalue());
+        ui->plotLPHist->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).histLocations,crate_.GetOneModule(mm).GetOneChannel(dd).histValues);
+
+
+        ui->plotHV->graph(gi)->rescaleValueAxis(false,true);
+        ui->plotLP->graph(gi)->rescaleValueAxis(false,true);
+        ui->plotLPHist->graph(gi)->rescaleValueAxis(false,true);
 
     }
     ui->plotHV->xAxis->setRange(now-3600, now+100);
@@ -389,15 +426,24 @@ void MainWindow::slotGraphRefresh()     // refreshing HV monitor graph
 
     ui->plotLP->xAxis->setRange(now-3600, now+100);
     ui->plotLP->rescaleAxes(true);
+
 //    double upperRange = ui->plotHV->graph()->getValueRange(bool foundrange, QCP::sdBoth, QCPRange()).upper; //*1.1;
+
+
     ui->plotHV->yAxis->setRangeUpper(ui->plotHV->yAxis->range().upper*1.005);
     ui->plotHV->yAxis->setRangeLower(ui->plotHV->yAxis->range().lower*0.995);
 
     ui->plotLP->yAxis->setRangeUpper(ui->plotLP->yAxis->range().upper*1.005);
     ui->plotLP->yAxis->setRangeLower(ui->plotLP->yAxis->range().lower*0.995);
 
+    ui->plotLPHist->yAxis->setRangeUpper(100);
+    ui->plotLPHist->yAxis->setRangeLower(0);
+    ui->plotLPHist->xAxis->setRangeUpper(21);
+    ui->plotLPHist->xAxis->setRangeLower(0);
+
     ui->plotHV->replot();
     ui->plotLP->replot();
+    ui->plotLPHist->replot();
 }
 
 void MainWindow::slotCheckCrateHVStatus()
@@ -449,23 +495,32 @@ void MainWindow::slotTableUpdate(bool change_)
                 if(j == 2)
                 {
                     QWidget* pWidget = new QWidget();
+                    QWidget* pWidgetLP = new QWidget();
                     QPushButton* visibleButton = new QPushButton();
+                    QPushButton* visibleButton_2 = new QPushButton();
                     visibleButton->autoFillBackground();
+                    visibleButton_2->autoFillBackground();
  //                   visibleButton->setText("Visible");
                     visibleButton->setCheckable(true);
                     visibleButton->setPalette(paletteGreen_);
+                    visibleButton_2->setCheckable(true);
+                    visibleButton_2->setPalette(paletteGreen_);
                     if(deviceData_.at(i).at(j)=="1")
                     {
                         visibleButton->setText("Visible");
                         visibleButton->setChecked(true);
+                        visibleButton_2->setText("Visible");
+                        visibleButton_2->setChecked(true);
                     }
                     else if(deviceData_.at(i).at(j)=="0")
                     {
                         visibleButton->setText("UnVisible");
                         visibleButton->setChecked(false);
+                        visibleButton_2->setText("UnVisible");
+                        visibleButton_2->setChecked(false);
                     }
-
                     connect(visibleButton, SIGNAL(clicked(bool)), this, SLOT(slotVisibleClicked(bool)));
+                    connect(visibleButton_2, SIGNAL(clicked(bool)), this, SLOT(slotVisibleClicked(bool)));
 //  connect(btn_edit, &QPushButton::clicked, this, &MainWindow::onClicked);
                     QHBoxLayout* pLayout = new QHBoxLayout(pWidget);
                     pLayout->addWidget(visibleButton);
@@ -473,6 +528,12 @@ void MainWindow::slotTableUpdate(bool change_)
                     pLayout->setContentsMargins(0, 0, 0, 0);
                     pWidget->setLayout(pLayout);
                     ui->tableData->setCellWidget(i, j, pWidget);
+                    QHBoxLayout* pLayoutLP = new QHBoxLayout(pWidgetLP);
+                    pLayoutLP->addWidget(visibleButton_2);
+                    pLayoutLP->setAlignment(Qt::AlignCenter);
+                    pLayoutLP->setContentsMargins(0, 0, 0, 0);
+                    pWidgetLP->setLayout(pLayoutLP);
+                    ui->tableData_2->setCellWidget(i, j, pWidgetLP);
                     continue;
 
                 }
@@ -501,10 +562,13 @@ void MainWindow::slotTableUpdate(bool change_)
 
                 }
  //               if(j!=4)   // leave V_mon for edit filling all the columns but 4
-                {
+               else  {
                 QTableWidgetItem*item = new QTableWidgetItem(deviceData_.at(i).at(j));
+                QTableWidgetItem*item_2 = new QTableWidgetItem(deviceData_.at(i).at(j));
                 if(j!=3)item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+                if(j!=3)item_2->setFlags(item_2->flags() ^ Qt::ItemIsEditable);
                 ui->tableData->setItem(i, j, item);
+                ui->tableData_2->setItem(i, j, item_2);
                }
 
             }
@@ -512,6 +576,8 @@ void MainWindow::slotTableUpdate(bool change_)
 
       //  emit graphRefresh();   <- fails when there are no data at the start-up.
           ui->plotHV->replot();
+          ui->plotLP->replot();
+          ui->plotLPHist->replot();
     }
 }
 
@@ -676,7 +742,7 @@ void MainWindow::slotVisibleClicked(bool)
     QWidget *w = qobject_cast<QWidget *>(sender()->parent());
     if(w)
      {
-        int row = ui->tableData->indexAt(w->pos()).row();
+        int row = ui->tableData->indexAt(w->pos()).row();  //here also/
         bool btn_status_;
         if(deviceData_.at(row).at(2)=="1")btn_status_=true;
         if(deviceData_.at(row).at(2)=="0")btn_status_=false;
@@ -720,6 +786,7 @@ void MainWindow::slotVisibleClicked(bool)
        pLayout->setContentsMargins(0, 0, 0, 0);
        pWidget->setLayout(pLayout);
        ui->tableData->setCellWidget(row, 2, pWidget);
+ //?      ui->tableData_2->setCellWidget(row, 2, pWidget);
        emit deviceDataChanged(true);
        emit graphRefresh();
 
@@ -847,6 +914,7 @@ void MainWindow::slotONOFFClicked(bool)
         pLayout->setContentsMargins(0, 0, 0, 0);
         pWidget->setLayout(pLayout);
         ui->tableData->setCellWidget(row, 7, pWidget);
+ //?       ui->tableData_2->setCellWidget(row, 7, pWidget);
 
        }
 
@@ -883,6 +951,7 @@ void MainWindow::slotLoadSetup(bool)
     fillTableData();
     initPlot(ui->plotHV);
     initPlot(ui->plotLP);
+    initPlot(ui->plotLPHist);
     emit checkCrateHVStatus();
     initialisation_ = false;
 
@@ -950,9 +1019,18 @@ void MainWindow::slotloadTableDataToCrate()
 //int customChanelNumber = 0;
 //double customDevicevolt = 0;
 double voltDif = 5.0;
+int sampCount = 500;
+int binCount = 20;
+
 void MainWindow::slotInitStabilisation()
 {
     try{
+        delete drsLogFile;
+        drsLogFile = new ofstream("drsLog.data");
+        *drsLogFile<<"# ";
+
+
+
         initPlot(ui->plotLP);   //initialising LP possition plot
         slotReadHV();           // read current HV from the power supply
         if(drsAmpMesure!=nullptr){
@@ -973,39 +1051,43 @@ void MainWindow::slotInitStabilisation()
             for(ulong j=0;j<tempDevVector->size();j++){
                 Device* device = &tempDevVector->at(j);
                 double defVolt= device->GetDeviceInitHV().GetVoltage();
+                SNMPProces(snmp->SetOneChannel("outputVoltage",QString::number(device->GetChannelNumber()),defVolt+voltDif));
+                *drsLogFile<<device->GetDeviceName()<<" ";
+            }
+        }
+        *drsLogFile<<std::endl;
+        sleep(1);
+        auto mes1 = drsAmpMesure->getConvertedAmps(std::chrono::seconds(1),sampCount,true);
+
+        for(ulong i=0;i<tempModVector->size();i++){
+            vector<Device>* tempDevVector = tempModVector->at(i).GetAllChannelsPtr();
+            for(ulong j=0;j<tempDevVector->size();j++){
+                Device* device = &tempDevVector->at(j);
+                double defVolt= device->GetDeviceInitHV().GetVoltage();
+                SNMPProces(snmp->SetOneChannel("outputVoltage",QString::number(device->GetChannelNumber()),defVolt-voltDif));
+                device->SetDeviceSetHV(defVolt);
+            }
+        }
+        sleep(1);
+        auto mes2 = drsAmpMesure->getConvertedAmps(std::chrono::seconds(1),sampCount);
+
+        for(ulong i=0;i<tempModVector->size();i++){
+            vector<Device>* tempDevVector = tempModVector->at(i).GetAllChannelsPtr();
+            for(ulong j=0;j<tempDevVector->size();j++){
+                Device* device = &tempDevVector->at(j);
+                double defVolt= device->GetDeviceInitHV().GetVoltage();
                 SNMPProces(snmp->SetOneChannel("outputVoltage",QString::number(device->GetChannelNumber()),defVolt));
-            }
-        }
-        sleep(1);
-        auto mes1 = drsAmpMesure->getConvertedAmps(1.0,200,true);
 
-        for(ulong i=0;i<tempModVector->size();i++){
-            vector<Device>* tempDevVector = tempModVector->at(i).GetAllChannelsPtr();
-            for(ulong j=0;j<tempDevVector->size();j++){
-                Device* device = &tempDevVector->at(j);
-                double defVolt= device->GetDeviceInitHV().GetVoltage();
-                SNMPProces(snmp->SetOneChannel("outputVoltage",QString::number(device->GetChannelNumber()),defVolt-voltDif));
-            }
-        }
-        sleep(1);
-        auto mes2 = drsAmpMesure->getConvertedAmps(1.0,200);
-
-        for(ulong i=0;i<tempModVector->size();i++){
-            vector<Device>* tempDevVector = tempModVector->at(i).GetAllChannelsPtr();
-            for(ulong j=0;j<tempDevVector->size();j++){
-                Device* device = &tempDevVector->at(j);
-                double defVolt= device->GetDeviceInitHV().GetVoltage();
-                SNMPProces(snmp->SetOneChannel("outputVoltage",QString::number(device->GetChannelNumber()),defVolt-voltDif));
-
-                double m1 = mes1.at(i).at(j);
-                double m2 = mes2.at(i).at(j);
+                double m1 = mes1.at(i).at(j).getAvrage();
+                double m2 = mes2.at(i).at(j).getAvrage();
                 cout <<"dev="<<device->GetDeviceName() <<" m1=" << m1<< " m2=" << m2<< endl;
 
-                device->SetDeviceCurrLP(m1);
+
+                device->SetDeviceCurrLP(0.5*(m1+m2));
 
                 vector<double> vec ;
-                vec.push_back(m1 - (m1-m2)/voltDif * defVolt); //constant term
-                vec.push_back((m1-m2)/voltDif); //linear term
+                vec.push_back(m1 - (m1-m2)/(2*voltDif) * defVolt); //constant term
+                vec.push_back((m1-m2)/(2*voltDif)); //linear term
                 device->SetDeviceLPCal(vec);
 
 
@@ -1028,6 +1110,7 @@ void MainWindow::slotInitStabilisation()
 
 }
 
+double stabCoef = 0.1;
 
 void MainWindow::slotStartStab()
 {
@@ -1036,27 +1119,41 @@ void MainWindow::slotStartStab()
 //    SNMPProces( snmp->Walk("outputMeasurementSenseVoltage"));
 //    sleep(5);
 
-    auto mes = drsAmpMesure->getConvertedAmps(1.0,200);
+    auto mes = drsAmpMesure->getConvertedAmps(std::chrono::seconds(1),sampCount);
     vector<Module>* tempModVector = crate_.GetAllModulesPtr();
-
+    int totalCount = 0;
+    *drsLogFile<<QDateTime::currentDateTime().toString(Qt::ISODate).toStdString()<<" ";
     for(ulong i=0;i<tempModVector->size();i++){
         vector<Device>* tempDevVector = tempModVector->at(i).GetAllChannelsPtr();
         for(ulong j=0;j<tempDevVector->size();j++){
             Device* device = &tempDevVector->at(j);
 
-            double volts =  device->Get().GetVoltage();// snmp->GetOneChannel("outputVoltage",QString(device->GetChannelNumber())).toDouble();
-            double m1 = mes.at(i).at(j);
-            double newV =volts - 1 * (m1- device->GetDeviceCurrLP())/device->GetDeviceLPCal()[1];
-            cout <<"oldV="<<volts <<" stab nV =" << newV<< " m = " <<m1 <<" om="<< device->GetDeviceCurrLP()<< endl;
+            double oldVolts =  device->GetDeviceSetHV();
+            double m1 = mes.at(i).at(j).getAvrage();
+            double newV =oldVolts - stabCoef * (m1- device->GetDeviceCurrLP())/device->GetDeviceLPCal()[1];
+            cout <<"oldV="<<oldVolts <<" stab nV =" << newV<< " m = " <<m1 <<" om="<< device->GetDeviceCurrLP()<< endl;
             auto maxV = device->GetDeviceLimitHV().GetVoltage();
+            if(maxV==0)
+                maxV = 900;
             if(newV>maxV)
                 newV = maxV;
             if(newV>maxV|| newV<0 )
                 throw ;
             SNMPProces(snmp->SetOneChannel("outputVoltage",QString::number(device->GetChannelNumber()),newV));
-            device->AddHistoryLPData(m1/device->GetDeviceCurrLP());
+            device->AddHistoryLPData(m1/device->GetDeviceCurrLP() + totalCount++*0);
+            *drsLogFile<<oldVolts<<" "<<m1<<" ";
+            device->SetDeviceSetHV(newV);
+            //histValues, QVector<double> * locations,
+            mes.at(i).at(j).setHist(&(device->histValues),&(device->histLocations),binCount);
+
+
+
+
+//            device->singleChanellResult = mes.at(i).at(j).values;
         }
     }
+    *drsLogFile<<std::endl;
+    delete snmp;
 }
 
 

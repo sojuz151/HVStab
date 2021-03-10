@@ -8,6 +8,7 @@
 #include <QVector>
 #include <qcustomplot.h>
 
+
 using namespace std;
 
 class Device
@@ -27,6 +28,7 @@ public:
     string GetDeviceType() {return deviceType_;}
     hv GetDeviceInitHV() {return deviceInitHV_;}
     hv GetDeviceCurrHV() {return deviceCurrHV_;}
+    double GetDeviceSetHV(){return setHV_;}
     double GetDeviceInitLP() {return deviceInitLP_;}
     double GetDeviceCurrLP() {return deviceCurrLP_;}
     bool GetDeviceStatusON() {return deviceStatusON_;}    // 0(false) = OFF ; 1(true) = ON
@@ -50,9 +52,15 @@ public:
     void SetDeviceDRSAdress(string s){deviceDRSAdress_ = s;}
     void SetDeviceStatusON(bool status) {deviceStatusON_ = status;}
     void SetDeviceLimitHV(hv limitHV) {deviceLimitHV_ = limitHV;}
+    void SetDeviceSetHV(double setHV) {setHV_ = setHV;}
     void AddHistoryHVData(double value);
     void AddHistoryLPData(double value);
     string deviceDRSAdress_;
+    QVector<double> histLocations;
+    QVector<double> histValues;
+
+
+
 
 private:
     int deviceChannelNumber_;
@@ -64,6 +72,7 @@ private:
     double deviceCurrLP_;
     double deviceLPLimitMin_;
     double deviceLPLimitMax_;
+    double setHV_;
     vector<double> deviceLPCal_;
 
 

@@ -47,6 +47,7 @@ public slots:
     void slotGraphRefresh();
     void slotSelectionHVChanged();
     void slotSelectionLPChanged();
+    void slotSelectionLPHChanged();
     void slotSelectionChanged(QCustomPlot *plot);
     void slotCheckCrateHVStatus();      // check status of the HV on all channels
     void slotIPChanged();  //sets the local IP variable
@@ -86,6 +87,7 @@ private:
     bool initialisation_;
     bool stabilisationRunning_;
     DrsAmpMesure* drsAmpMesure = nullptr;
+    ofstream* drsLogFile = nullptr;
 
 };
 

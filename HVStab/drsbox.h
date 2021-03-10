@@ -28,8 +28,7 @@ class DRSBox
 {
 public:
     DRSBox();
-    DRSBox(int BoxNumber,
-           vector<DRSBoxChannel> BoxChannels) :
+    DRSBox(int BoxNumber,vector<DRSBoxChannel> BoxChannels) :
         dRSBoxNumber_(BoxNumber),
         dRSBoxChannels_(BoxChannels)
     {}

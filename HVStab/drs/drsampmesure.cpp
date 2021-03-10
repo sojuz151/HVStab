@@ -96,8 +96,9 @@ DrsAmpMesure::DrsAmpMesure(float delayNs,float frequency){
 //       }
     }
 }
-std::vector<double> DrsAmpMesure::getAmp(float timeOut, int maxCount,bool save){
+std::vector<SingleChanellResult> DrsAmpMesure::getAmp(std::chrono::duration<double> timeOut, int maxCount,bool save){
     FILE  *f;
+    auto startTime = std::chrono::system_clock::now();
 
     if(save){
         f = fopen("data.txt", "w");
@@ -107,12 +108,8 @@ std::vector<double> DrsAmpMesure::getAmp(float timeOut, int maxCount,bool save){
     }
     int boardCount = drs->GetNumberOfBoards();
     int iterCount = 0 ;
-    std::vector<double> accu(4*boardCount) ;
-     std::vector<double> accuSq(4*boardCount) ;
-    for(int i=0;i<boardCount;i++)
-        for(int j =0;j<4;j++)
-            accu[4*i+j]=0;
-    while (iterCount<=maxCount) {
+    std::vector<SingleChanellResult> accu(4*boardCount) ;
+    while (iterCount<=maxCount && std::chrono::system_clock::now()-startTime<timeOut) {
         /* start boards (activate domino wave), master is last */
         for (int j=boardCount-1 ; j>=0 ; j--)
            drs->GetBoard(j)->StartDomino();
@@ -145,8 +142,7 @@ std::vector<double> DrsAmpMesure::getAmp(float timeOut, int maxCount,bool save){
                 for (int k=0 ; k<1024 ; k++)
                    localAcu+= wave_array[chanell][k]-baseline; //sum of integral per channel. Can be done much better but for now it is fine.
 
-                accu[4*board+chanell]+= localAcu;
-                accuSq[4*board+chanell]+= localAcu*localAcu;
+                accu[4*board+chanell].addPoint( localAcu);
 
           }
           if(save){
@@ -162,9 +158,6 @@ std::vector<double> DrsAmpMesure::getAmp(float timeOut, int maxCount,bool save){
         }
         iterCount++;
     }
-    for(int i=0;i<boardCount;i++)
-        for(int j =0;j<4;j++)
-            accu[4*i+j]/=iterCount;
     if(save){
         fclose(f);
     }
@@ -172,9 +165,9 @@ std::vector<double> DrsAmpMesure::getAmp(float timeOut, int maxCount,bool save){
 }
 
 
-std::vector<std::vector<double> > DrsAmpMesure::getConvertedAmps(float timeOut, int maxCount,bool save){
+std::vector<std::vector<SingleChanellResult> > DrsAmpMesure::getConvertedAmps(std::chrono::duration<double> timeOut, int maxCount,bool save){
     auto data = getAmp(timeOut,maxCount,save);
-    std::vector<std::vector <double> > ret;
+    std::vector<std::vector <SingleChanellResult> > ret;
     for(ulong i =0; i<indexMap.size();i++){
         ret.push_back({});
         for(ulong j= 0; j<indexMap[i].size();j++){
@@ -197,7 +190,7 @@ void  DrsAmpMesure::setIndexMap(    Crate crate_,DRSBox dRSbox){
             auto device =  module.GetAllChannelsPtr()->at(dd);
             int box=0,boxChanell=0;
 
-            int j = 0;
+            ulong j = 0;
             while(device.deviceDRSAdress_.at(j)!='.'){
                  box=box *10 + device.deviceDRSAdress_.at(j) -'0';
                  j++;
@@ -226,5 +219,24 @@ void  DrsAmpMesure::setIndexMap(    Crate crate_,DRSBox dRSbox){
             std::cout<<"mm = "<<mm<<" dd = "<<dd <<" i="<<i<<" chanel="<<chanell.GetdrsChannel() <<endl;
         }
     }
+}
+void  SingleChanellResult::setHist( QVector<double> * histValues, QVector<double> * locations,int count){
+    double max = *std::min_element(values.begin() ,values.end()); //reversed polarity
+    double min = *std::max_element(values.begin() ,values.end());
+    double av = getAvrage();
+    locations->resize(count);
+    histValues->resize(count);
+    for(int i=0;i<count;i++){
+        (*locations)[i] = i;//(min+ (max-min)*i*1.0/count)/av;
+        (*histValues)[i]= 0;
+    }
+    for(int i=0;i<values.size();i++){
+        int index = ((values[i] - min) /(max-min))*count;
+        if(index>=count)
+            index = count-1;
+        (*histValues)[index]++;
+    }
+
+
 }
 

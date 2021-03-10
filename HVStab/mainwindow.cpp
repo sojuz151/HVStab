@@ -384,6 +384,10 @@ void MainWindow::slotGraphRefresh()     // refreshing HV monitor graph
 {
     double now = QDateTime::currentDateTime().toTime_t();
 
+    double histMinVal =  std::numeric_limits<double>::infinity();
+    double histMaxVal = -std::numeric_limits<double>::infinity();
+    double histMaxBin = 0;
+
 
     for(int gi=0; gi<deviceData_.size(); ++gi){
         if (deviceData_.at(gi).at(2)=="1"){
@@ -421,8 +425,17 @@ void MainWindow::slotGraphRefresh()     // refreshing HV monitor graph
     //temporary for LPHisto-grams setData(double x,double y)
         ui->plotLP->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPkey(),crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPvalue());
 //        ui->plotLPHist->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPkey(),crate_.GetOneModule(mm).GetOneChannel(dd).GetDeviceHistoryLPvalue());
-        ui->plotLPHist->graph(gi)->setData(crate_.GetOneModule(mm).GetOneChannel(dd).histLocations,crate_.GetOneModule(mm).GetOneChannel(dd).histValues);
 
+        //check for visibility
+
+        if (deviceData_.at(gi).at(2)=="1"){
+            auto histLoc = crate_.GetOneModule(mm).GetOneChannel(dd).histLocations;
+            auto histBin = crate_.GetOneModule(mm).GetOneChannel(dd).histValues;
+            ui->plotLPHist->graph(gi)->setData(histLoc,histBin);
+            histMinVal = min(histMinVal,*std::min_element(histLoc.begin(),histLoc.end() ));
+            histMaxVal = max(histMaxVal,*std::max_element(histLoc.begin(),histLoc.end() ));
+            histMaxBin = max(histMaxBin,*std::max_element(histBin.begin(),histBin.end() ));
+        }
 
         ui->plotHV->graph(gi)->rescaleValueAxis(false,true);
         ui->plotLP->graph(gi)->rescaleValueAxis(false,true);
@@ -437,18 +450,24 @@ void MainWindow::slotGraphRefresh()     // refreshing HV monitor graph
 
 //    double upperRange = ui->plotHV->graph()->getValueRange(bool foundrange, QCP::sdBoth, QCPRange()).upper; //*1.1;
 
+    auto topMult = 1.005;
+    auto botMult = 0.995; //not the best way to do this
 
-    ui->plotHV->yAxis->setRangeUpper(ui->plotHV->yAxis->range().upper*1.005);
-    ui->plotHV->yAxis->setRangeLower(ui->plotHV->yAxis->range().lower*0.995);
+    ui->plotHV->yAxis->setRangeUpper(ui->plotHV->yAxis->range().upper*topMult);
+    ui->plotHV->yAxis->setRangeLower(ui->plotHV->yAxis->range().lower*botMult);
 
-    ui->plotLP->yAxis->setRangeUpper(ui->plotLP->yAxis->range().upper*1.005);
-    ui->plotLP->yAxis->setRangeLower(ui->plotLP->yAxis->range().lower*0.995);
+    ui->plotLP->yAxis->setRangeUpper(ui->plotLP->yAxis->range().upper*topMult);
+    ui->plotLP->yAxis->setRangeLower(ui->plotLP->yAxis->range().lower*botMult);
 
-    ui->plotLPHist->yAxis->setRangeUpper(ui->plotLPHist->yAxis->range().upper*1.005);
-    ui->plotLPHist->yAxis->setRangeLower(ui->plotLPHist->yAxis->range().lower*0.995);
+    ui->plotLPHist->yAxis->setRangeUpper(histMaxBin*topMult);
+    ui->plotLPHist->yAxis->setRangeLower(0);
 
-    ui->plotLPHist->xAxis->setRangeUpper(ui->plotLPHist->xAxis->range().upper*1.005);
-    ui->plotLPHist->xAxis->setRangeLower(ui->plotLPHist->xAxis->range().lower*0.995);
+//    auto upper = ui->plotLPHist->xAxis->range().upper*1.005;
+//    auto lower = ui->plotLPHist->xAxis->range().lower*0.995;
+//    auto plot =ui->plotLPHist;
+
+    ui->plotLPHist->xAxis->setRangeUpper(histMaxVal*botMult);
+    ui->plotLPHist->xAxis->setRangeLower(histMinVal*topMult);
 
     ui->plotHV->replot();
     ui->plotLP->replot();

@@ -1,0 +1,3 @@
+set autoscale
+set xdata time
+set timefmt "%Y-%m-%dT%H:%M:%S"

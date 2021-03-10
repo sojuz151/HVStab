@@ -1044,11 +1044,13 @@ void MainWindow::slotloadTableDataToCrate()
 }
 
 //-----------------------Stabilisation routines below ------------------------
-//int customChanelNumber = 0;
-//double customDevicevolt = 0;
+
+//TODO DO GUI
 double voltDif = 5.0;
 int sampCount = 500;
 int binCount = 20;
+auto timeOut = std::chrono::seconds(1);
+double stabCoef = 0.1;
 
 void MainWindow::slotInitStabilisation()
 {
@@ -1056,9 +1058,6 @@ void MainWindow::slotInitStabilisation()
         delete drsLogFile;
         drsLogFile = new ofstream("drsLog.data");
         *drsLogFile<<"# ";
-
-
-
         initPlot(ui->plotLP);   //initialising LP possition plot
         slotReadHV();           // read current HV from the power supply
         if(drsAmpMesure!=nullptr){
@@ -1085,7 +1084,7 @@ void MainWindow::slotInitStabilisation()
         }
         *drsLogFile<<std::endl;
         sleep(1);
-        auto mes1 = drsAmpMesure->getConvertedAmps(std::chrono::seconds(1),sampCount,true);
+        auto mes1 = drsAmpMesure->getConvertedAmps( timeOut,sampCount,true);
 
         for(ulong i=0;i<tempModVector->size();i++){
             vector<Device>* tempDevVector = tempModVector->at(i).GetAllChannelsPtr();
@@ -1097,7 +1096,7 @@ void MainWindow::slotInitStabilisation()
             }
         }
         sleep(1);
-        auto mes2 = drsAmpMesure->getConvertedAmps(std::chrono::seconds(1),sampCount);
+        auto mes2 = drsAmpMesure->getConvertedAmps(timeOut,sampCount);
 
         for(ulong i=0;i<tempModVector->size();i++){
             vector<Device>* tempDevVector = tempModVector->at(i).GetAllChannelsPtr();
@@ -1138,7 +1137,6 @@ void MainWindow::slotInitStabilisation()
 
 }
 
-double stabCoef = 0.1;
 
 void MainWindow::slotStartStab()
 {
@@ -1147,7 +1145,7 @@ void MainWindow::slotStartStab()
 //    SNMPProces( snmp->Walk("outputMeasurementSenseVoltage"));
 //    sleep(5);
 
-    auto mes = drsAmpMesure->getConvertedAmps(std::chrono::seconds(1),sampCount);
+    auto mes = drsAmpMesure->getConvertedAmps(timeOut,sampCount);
     vector<Module>* tempModVector = crate_.GetAllModulesPtr();
     int totalCount = 0;
     *drsLogFile<<QDateTime::currentDateTime().toString(Qt::ISODate).toStdString()<<" ";

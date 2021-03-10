@@ -119,5 +119,7 @@ CMakeLists.txt.user*
 *.cxxflags
 *.cflags
 
+drsLog.data
+
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,qt,qtcreator,cmake

@@ -119,7 +119,8 @@ CMakeLists.txt.user*
 *.cxxflags
 *.cflags
 
-drsLog.data
-
+*drsLog.data
+*data.txt
+HVStab/HVStab
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,qt,qtcreator,cmake
